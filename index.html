@@ -1,0 +1,79 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body style="background: black; display: flex;align-items: center;justify-content: center;">
+    <canvas id="canvas" width="700" height="700"></canvas>
+
+    <script>
+        // Based on MDN example:
+        // https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Basic_animations
+
+        var sun = new Image();
+        var moon = new Image();
+        var earth = new Image();
+        var ctx = null;
+        var scale = 1/3;
+
+        function init() {
+            sun.src = 'Canvas_sun.png';
+            moon.src = 'Canvas_moon.png';
+            earth.src = 'Canvas_earth.png';
+            window.requestAnimationFrame(draw);
+        }
+
+        function drawPlanet(time, offset) {
+            ctx.save();
+            const milliseconds = time % 1000;
+            const seconds = offset + Math.floor(time / 1000) % 60
+
+            // Earth
+            ctx.rotate(((2 * Math.PI) / 60) * seconds + ((2 * Math.PI) / 60000) * milliseconds);
+            ctx.translate(105*scale, 0);
+            ctx.drawImage(earth, -12*scale, -12*scale, 24*scale, 24*scale);
+
+            for (var i=0; i<6; i++) {
+                // Moon
+                ctx.save();
+                ctx.rotate(((2 * Math.PI) / 6) * (i + seconds) + ((2 * Math.PI) / 6000) * milliseconds);
+                ctx.translate(0, 9.5);
+                ctx.drawImage(moon, -3.5*scale, -3.5*scale, 7*scale, 7*scale);
+                ctx.restore();
+            }
+
+            ctx.restore();
+        }
+
+        function drawSystem(x, y, time) {
+            ctx.drawImage(sun, x-(300/2*scale), y-(300/2*scale), (300 * scale), (300 * scale));
+            ctx.save();
+            ctx.translate(x, y);
+            for (var i=0; i<12; i++) {
+                drawPlanet(time, i*5);
+            }
+            ctx.restore();
+        }
+
+        function draw() {
+            var time = Date.now()
+            ctx.clearRect(0, 0, 700, 700); // clear canvas
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+            ctx.strokeStyle = 'rgba(0, 153, 255, 0.4)';
+            for (let i=0; i<7; i++) {
+                for (let j=0; j<7; j++) {
+                    drawSystem(i*100+50, j*100+50, time)
+                }
+            }
+            window.requestAnimationFrame(draw);
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            ctx = document.getElementById('canvas').getContext('2d');
+            init();
+        });
+    </script>
+</body>
+</html>
